@@ -1,0 +1,87 @@
+
+Nowy project z Zend 2 application skeleton
+
+stworzenie kontrolera do REST API:
+w katalogu: module/Application/src/Application/Controller/
+tworzymy plik: RestApiController.php
+
+Do kontrolera musimy dołączyć: 
+    Zend\Mvc\Controller\AbstractRestfulController;
+    Zend\View\Model\JsonModel;
+
+AbstractRestfulController posiada 5 metod które musimy zaimplementować, obok żądania HTTP jakie je wywolują: 
+
+getList() - GET (bez parametrów), 
+get($id) - GET (z parametrami), 
+create($data) - POST, 
+update($id, $data) - PUT, 
+delete($id) - DELETE,
+
+Uzupełniamy metody prostą tablicą i zwracamy ją w postaci formatu JSON, do tego wykorzystamy model JsonModel
+wystarczy aby pokazać, że działa.
+
+Mamy stworzony kontroler, trzeba go teraz zarejestrować w pliku module.config.php i stworzyć dla niego ścieżkę routingu.
+
+Dopisujemy liniję:
+'Application\Controller\RestApi' => 'Application\Controller\RestApiController' 
+w częsci "Controllers", a w części "routes" dodajemy:
+
+            'restapi' => array(
+                'type'    => 'segment',
+                'options' => array(
+                    'route'    => '/restapi[/:id]',
+                    'constraints' => array(
+                        'id'     => '[0-9]+',
+                    ),
+                    'defaults' => array(
+                        'controller' => 'Application\Controller\RestApi',
+                    ),
+                ),
+            ), 
+
+
+a w części 'view_manager' dodajemy 'strategies':
+
+'view_manager' => array(
+
+ 'strategies' => array(
+            'ViewJsonStrategy'
+        )
+
+);
+
+
+
+zmiana composer.json: dopisanie /"zfr/zfr-cors": "*"/ w "require"
+
+w konsoli, w katalogu projektu: composer install
+
+w Vendor dodaje się katalog: "zfr"
+
+Konfiguracja ZFR_CORS
+w: config/application.config.php
+dodajemy modul: 'ZfrCors',
+
+w katalogu :
+vendor/zfr/zfr-cors/config/
+
+kopiujemy plik 
+zfr_cors.global.php.dist
+do katalogu: 
+config/autoload/
+
+zmieniamy plik:
+zfr_cors.global.php.dist
+
+na plik: 
+zfr_cors.global.php
+
+w pliku tym zmieniamy odkomentowujemy linijki:
+'allowed_origins' => array('http://@NASZADOMENA@'),
+'allowed_methods' => array('GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'),
+'allowed_headers' => array('Authorization', 'Content-Type'),
+
+w 
+'allowed_origins' => array('http://@NASZADOMENA@'), 
+zamiast @NASZADOMENA@ wstawiamy adres z którego wychodzą requesty, np: http://4example.eu
+
